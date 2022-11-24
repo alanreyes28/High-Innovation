@@ -43,5 +43,7 @@ Node-RED es una herramienta de programacion para conectar dispositivos de hardwa
 
 Proporciona un editoir basado en navegador que facilita la conexion de flujos entre si utilizando la amplia gama de nodos de la paleta que se pueden implementar en su 
 tiempo de ejecucion con un solo clic.
-<img src= https://upload.wikimedia.org/wikipedia/commons/2/2b/Node-red-icon.png width='50%'/>
+
+<img src= https://upload.wikimedia.org/wikipedia/commons/2/2b/Node-red-icon.png width='15%'/>
+
 <img src= https://infosys.beckhoff.com/content/1033/tf6720_tc3_iot_data_agent/Images/png/3295782027__en-US__Web.png width='50%'/>
