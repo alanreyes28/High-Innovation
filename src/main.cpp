@@ -1,25 +1,14 @@
-#include <Arduino.h> // Library included with PlatformIO
-#include <Wifi.h> // Wifi Library
-#include <PubSubClient.h> // MQTT Library
+#include <Arduino.h>
+#include <WiFi.h>
+#include <WebServer.h>
+// #include <ArduinoJson.h>
+// #include <FreeRTOS.h>
 
+// //*********** WIFICONFIG ***************//
 
-//*********** MQTT CONFIG **************//
-
-const char *mqtt_server = "highinnovation.space"; 
-const int mqtt_port = 1883; //....
-const char *mqtt_user = "";
-const char *mqtt_pass = ""; 
-const char *root_topic_subscribe = "esp32/input";
-const char *root_topic_publish = "master/mqtt06/writeattributevalue/writeAttribute/6iUzmPqTk8aQi8kMpsqE7S"; 
-
-
-
-//*********** WIFICONFIG ***************//
-
-// replace with network credentials 
-const char* ssid = "LIB-3778491";
-const char* password =  "xbsf5QfKymtk";
-
+const char *SSID = "LIB-3778491"; // name of internet router
+const char *PWD = "xbsf5QfKymtk"; // password
+WebServer server(80);
 //*********** VARIABLES  ***************//
 
 const int tempPin = 2; // analog input pin constant
@@ -60,4 +49,21 @@ void loop()
   Serial.println(" degrees F\n");
 
   delay(1000); // wait for 1 second or 1000 milliseconds before taking the next reading.
+ }
+
+void wifiConnect()
+{
+  Serial.print("Connecting to ");
+  Serial.println(SSID);
+
+  WiFi.begin(SSID, PWD);
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(500);
+  }
+
+  Serial.print("Connected. IP: ");
+  Serial.println(WiFi.localIP());
 }
