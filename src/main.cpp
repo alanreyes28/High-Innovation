@@ -1,55 +1,69 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
-// #include <ArduinoJson.h>
-// #include <FreeRTOS.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <stdio.h>
+#include <PubSubClient.h>
+#include <driver/adc.h>
 
-// //*********** WIFICONFIG ***************//
+#define PIN_LED GPIO_NUM_4
+#define ON 1
+#define OFF 0
+
+//**** WIFICONFIG ******//
 
 const char *SSID = "LIB-3778491"; // name of internet router
 const char *PWD = "xbsf5QfKymtk"; // password
-WebServer server(80);
-//*********** VARIABLES  ***************//
 
-const int tempPin = 2; // analog input pin constant
+//**** MQTT ******//
 
-int tempVal; // temperature sensor raw readings
+const char *MQTTBroker = "HighInnovation.space";
+const int MQTTPort = 1883;
 
-float volts; // variable for storing voltage
+//**** PUBSUBCONFIG ******//
 
-float tempC; // temperature variable in Degrees Celcius
+const char *publishTopic = "tempcelcius";
+const char *subscribeTopic = "config";
 
-float tempF; // temperature variable in Degrees Farenheit
+WiFiClient espClient;
+PubSubClient client(espClient);
 
-void setup()
+//**** VARIABLES  ******//
+
+float tempRaw, volts, resistance, kelvin, celcius, farenheit; // variables for calculating temperature
+
+//**** FUNCTIONS  ******//
+
+void callback()
 {
-  // put your setup code here, to run once:
-  pinMode(LED_BUILTIN, OUTPUT);
-  Serial.begin(921600);
-  Serial.println("Hello from the setup");
+  // This is the callback for the mqtt function
 }
 
-void loop()
+void roomCheck()
 {
-  // put your main code here, to run repeatedly:
-  tempVal = analogRead(tempPin);
+  // This function will ask what room you are in
+}
 
-  volts = tempVal / 1023.0; // normalize by the maximum temperature raw reading range
-
-  tempC = (volts - 0.5) * 100; // calculate temperature celsius from voltage as per the equation found on the sensor spec sheet.
-
-  tempF = ((volts - 0.5) * 100) * 1.8 + 32;
-
-  Serial.print(" Temperature is:   "); // print out the following string to the serial monitor
-  Serial.print(tempC);                 // in the same line print the temperature
-  Serial.println(" degrees C\n");      // still in the same line print degrees C, then go to next line.
-
-  Serial.print(" Temperature is:   "); // print out the following string to the serial monitor
-  Serial.print(tempF);                 // in the same line print the temperature
-  Serial.println(" degrees F\n");
-
-  delay(1000); // wait for 1 second or 1000 milliseconds before taking the next reading.
- }
+void mqttConnect()
+{
+  while (!client.connected())
+  {
+    Serial.print("Connecting to MQTT Broker... ");
+    if (client.connect("ESP32_clientID"))
+    {
+      Serial.print("You connected to MQTT Broker Successfully");
+      Serial.println("\n");
+    }
+    else
+    {
+      Serial.print("Connection to MQTT Broker has failed with error: ");
+      Serial.print(client.state());
+      Serial.println("\n");
+      delay(3000);
+    }
+  }
+}
 
 void wifiConnect()
 {
@@ -60,10 +74,76 @@ void wifiConnect()
 
   while (WiFi.status() != WL_CONNECTED)
   {
-    Serial.print(".");
+    Serial.print("connecting...\n");
     delay(500);
+    gpio_set_level(PIN_LED, OFF);
   }
 
   Serial.print("Connected. IP: ");
   Serial.println(WiFi.localIP());
+  Serial.println("\n");
+  // MQTT
+  client.setServer(MQTTBroker, MQTTPort);
+
+  // client.setCallback(callback)
+  mqttConnect();
+}
+
+void setup()
+{
+  // put your setup code here, to run once:
+  pinMode(LED_BUILTIN, OUTPUT);
+  Serial.begin(921600);
+  Serial.println("Starting Setup...\n\n");
+  wifiConnect();
+}
+
+void loop()
+{
+  tempRaw = adc1_get_raw(ADC1_CHANNEL_7); // read raw analog output from thermistor
+
+  volts = (float)tempRaw / 4095.0 * 3.3; // convert it into volts
+
+  resistance = 10 * volts / (3.3 - volts); // consideration of resistance value
+
+  kelvin = 1 / (1 / (298.15) + log(resistance / 10) / 3950.0); // conversion of value to kelvin
+
+  celcius = kelvin - 273.15; // kelvin to celcius conversion
+
+  farenheit = (celcius * 9) / 5 + 32; // celcius to farenheit conversion
+
+  // terminal output of variables
+  Serial.println("Thermistor Output Data: ");
+  Serial.print("Analog: ");
+  Serial.println(tempRaw);
+  Serial.print("mVolts: ");
+  Serial.println(volts, 4);
+  Serial.print("Temp in kelvin: ");
+  Serial.println(kelvin, 4);
+  Serial.print("Temp in celcius: ");
+  Serial.println(celcius, 4);
+  Serial.print("Temp in farenheit: ");
+  Serial.println(farenheit, 4);
+  Serial.println("\n");
+
+  delay(1000); // wait for 1 second or 1000 milliseconds before taking the next reading.
+
+  char msg[50];
+  sprintf(msg, "%f", celcius);
+
+  if (!client.connected())
+  {
+    mqttConnect();
+  }
+
+  client.publish(publishTopic, String(celcius).c_str());
+  client.loop();
+}
+
+void calibration() // support for calibration of the temp sensor.
+{
+}
+
+void commission() // info about the room, location, wifi, etc
+{
 }
