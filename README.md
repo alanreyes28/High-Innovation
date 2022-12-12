@@ -1,6 +1,6 @@
 ### High-Innovation ESP32 Project
 INEL4206 Microprocessors I- Section 2 Final Project based on ESP32
->Due Date December 9th 2022
+>Due Date December 12th 2022
 
 ### Team Members:
 Imanol Rivera Sanjurjo  - imanol.rivera@upr.edu
