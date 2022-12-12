@@ -35,16 +35,6 @@ float tempRaw, volts, resistance, kelvin, celcius, farenheit; // variables for c
 
 //**** FUNCTIONS  ******//
 
-void callback()
-{
-  // This is the callback for the mqtt function
-}
-
-void roomCheck()
-{
-  // This function will ask what room you are in
-}
-
 void mqttConnect()
 {
   while (!client.connected())
@@ -138,12 +128,4 @@ void loop()
 
   client.publish(publishTopic, String(celcius).c_str());
   client.loop();
-}
-
-void calibration() // support for calibration of the temp sensor.
-{
-}
-
-void commission() // info about the room, location, wifi, etc
-{
 }
