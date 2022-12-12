@@ -21,12 +21,6 @@ ESP32 Kit Used:
 
 <img src= https://user-images.githubusercontent.com/60356566/201103807-fca603fb-79ff-4746-965e-6dece990fbd1.png width='50%'/>
 
-Analog Temperature Sensor:
-
->link for purchase: https://www.digikey.com/en/products/detail/texas-instruments/LMT84LPGM/8105989
-
-<img src=https://media.digikey.com/Photos/Texas%20Instr%20Photos/TO-92-3.jpg width='50%'/>
-
 ### Description: 
 The purpose of this project is to detect the temperature of a room across the campus. This is done by having multiple ESP32's equipped with temperature sensors and placing them in different rooms across the campus. 
 
